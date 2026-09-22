@@ -2,26 +2,27 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 
-// Allowed Origins mein Netlify aur Vercel dono ki links add kar di hain
-const allowedOrigins = [
-    'https://silly-sunflower-08c875.netlify.app',
-    'https://sharrin-frontend-opal.vercel.app'
-];
-
+// Exact Vercel URL with Credentials support
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Blocked by CORS policy'));
-        }
-    }
+    origin: 'https://sharrin-frontend-1.vercel.app',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
+
+app.options('*', cors({
+    origin: 'https://sharrin-frontend-1.vercel.app',
+    credentials: true
 }));
 
 app.use(express.json());
 
 // Token verification middleware
 const verifyToken = (req, res, next) => {
+    if (req.method === 'OPTIONS') {
+        return next();
+    }
+
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
         return res.status(401).json({ error: "Access Denied! No token provided." });
